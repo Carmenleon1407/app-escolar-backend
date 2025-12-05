@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
+from django.contrib.auth.models import Group
 
 class CustomAuthToken(ObtainAuthToken):
 
@@ -20,10 +21,33 @@ class CustomAuthToken(ObtainAuthToken):
             # Obtener perfil y roles del usuario
             roles = user.groups.all()
             role_names = []
+            
             # Verifico si el usuario tiene un perfil asociado
             for role in roles:
-                role_names.append(role.name.lower())  # Convertir a minúsculas
-
+                role_names.append(role.name.lower())
+            
+            # Si el usuario no tiene grupo, asignarlo automáticamente
+            if not role_names:
+                # Verificar qué tipo de perfil tiene y asignarle el grupo correspondiente
+                admin = Administradores.objects.filter(user=user).first()
+                maestro = Maestros.objects.filter(user=user).first()
+                alumno = Alumnos.objects.filter(user=user).first()
+                
+                if admin:
+                    admin_group, _ = Group.objects.get_or_create(name='Admin')
+                    user.groups.add(admin_group)
+                    role_names = ['admin']
+                elif maestro:
+                    maestro_group, _ = Group.objects.get_or_create(name='Maestro')
+                    user.groups.add(maestro_group)
+                    role_names = ['maestro']
+                elif alumno:
+                    alumno_group, _ = Group.objects.get_or_create(name='Alumno')
+                    user.groups.add(alumno_group)
+                    role_names = ['alumno']
+                else:
+                    return Response({"details": "Usuario sin perfil asociado"}, 403)
+            
             # Si solo es un rol específico asignamos el elemento 0
             if role_names:
                 role_names = role_names[0]
