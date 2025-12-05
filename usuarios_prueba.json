@@ -1,0 +1,47 @@
+[
+  {
+    "model": "app_movil_escolar_api.administradores",
+    "fields": {
+      "nombre": "Carlos",
+      "apellidos": "González Pérez",
+      "correo_electronico": "carlos.admin@escolar.com",
+      "contraseña": "gAAAAABnUxK5YzQwMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTA"
+    }
+  },
+  {
+    "model": "app_movil_escolar_api.administradores",
+    "fields": {
+      "nombre": "María",
+      "apellidos": "Rodríguez López",
+      "correo_electronico": "maria.admin@escolar.com",
+      "contraseña": "gAAAAABnUxK5YzQwMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTA"
+    }
+  },
+  {
+    "model": "app_movil_escolar_api.administradores",
+    "fields": {
+      "nombre": "José",
+      "apellidos": "Martínez Sánchez",
+      "correo_electronico": "jose.admin@escolar.com",
+      "contraseña": "gAAAAABnUxK5YzQwMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTA"
+    }
+  },
+  {
+    "model": "app_movil_escolar_api.administradores",
+    "fields": {
+      "nombre": "Ana",
+      "apellidos": "Fernández García",
+      "correo_electronico": "ana.admin@escolar.com",
+      "contraseña": "gAAAAABnUxK5YzQwMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTA"
+    }
+  },
+  {
+    "model": "app_movil_escolar_api.administradores",
+    "fields": {
+      "nombre": "Luis",
+      "apellidos": "Hernández Díaz",
+      "correo_electronico": "luis.admin@escolar.com",
+      "contraseña": "gAAAAABnUxK5YzQwMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTA"
+    }
+  }
+]
