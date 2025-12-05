@@ -89,8 +89,14 @@ class AdminView(generics.CreateAPIView):
     def put(self, request, *args, **kwargs):
         # Verificamos que el usuario esté autenticado
         permission_classes = (permissions.IsAuthenticated,)
-        # Primero obtenemos el administrador a actualizar
-        admin = get_object_or_404(Administradores, id=request.data["id"])
+        # Primero obtenemos el administrador a actualizar (acepta id en URL/query/body)
+        id_admin = kwargs.get('id') or request.GET.get('id') or request.data.get('id')
+        if not id_admin:
+            return Response({"detail": "Se requiere el campo 'id' en el body o en la URL (admin/{id})"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            admin = Administradores.objects.get(id=id_admin)
+        except Administradores.DoesNotExist:
+            return Response({"detail": "Administrador no encontrado."}, status=status.HTTP_404_NOT_FOUND)
         admin.clave_admin = request.data["clave_admin"]
         admin.telefono = request.data["telefono"]
         admin.rfc = request.data["rfc"]
@@ -107,7 +113,14 @@ class AdminView(generics.CreateAPIView):
         # return Response(user,200)
         
     # Eliminar administrador con delete (Borrar realmente)
-    # TODO: Agregar eliminación de administradores
+    @transaction.atomic
+    def delete(self, request, *args, **kwargs):
+        admin = get_object_or_404(Administradores, id=request.GET.get('id'))
+        try:
+            admin.user.delete()
+            return Response({"details":"Administrador eliminado"},200)
+        except Exception as e:
+            return Response({"details":"Algo pasó al eliminar"},400)
 
 class TotalUsers(generics.CreateAPIView):
     #Contar el total de cada tipo de usuarios

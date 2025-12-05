@@ -20,10 +20,16 @@ urlpatterns = [
         #path('admins-edit/', users.AdminsViewEdit.as_view())
     #Create Alumno
         path('alumnos/', alumnos.AlumnosView.as_view()),
+    # Alumno por ID (soporta rutas tipo /alumnos/123/)
+        path('alumnos/<int:id>/', alumnos.AlumnosView.as_view()),
     #Create Maestro
         path('maestros/', maestros.MaestrosView.as_view()),
+        # Maestro por ID (soporta rutas tipo /maestros/123/)
+        path('maestros/<int:id>/', maestros.MaestrosView.as_view()),
     #Maestro Data
         path('lista-maestros/', maestros.MaestrosAll.as_view()),
+    #Alumno Data
+        path('lista-alumnos/', alumnos.AlumnosAll.as_view()),
     #Total Users
         path('total-usuarios/', users.TotalUsers.as_view()),
     #Login

@@ -36,6 +36,17 @@ class MaestrosView(generics.CreateAPIView):
     
     #Obtener maestro por ID
     # TODO: Agregar obtención de maestro por ID
+    def get(self, request, *args, **kwargs):
+        id_maestro = kwargs.get('id') or request.GET.get('id')
+        maestro = get_object_or_404(Maestros, id=id_maestro)
+        maestro_data = MaestroSerializer(maestro, many=False).data
+        # Convertir materias_json a lista si es posible
+        if isinstance(maestro_data, dict) and "materias_json" in maestro_data:
+            try:
+                maestro_data["materias_json"] = json.loads(maestro_data["materias_json"]) if maestro_data["materias_json"] else []
+            except Exception:
+                maestro_data["materias_json"] = []
+        return Response(maestro_data, 200)
     
     #Registrar nuevo usuario maestro
     @transaction.atomic
@@ -77,11 +88,57 @@ class MaestrosView(generics.CreateAPIView):
     
     # Actualizar datos del maestro
     # TODO: Agregar actualización de maestros
+    @transaction.atomic
+    def put(self, request, *args, **kwargs):
+        # Logging temporal para depuración: imprimir encabezados, kwargs y body
+        try:
+            print("[DEBUG] PUT /maestros/ called", flush=True)
+            print("[DEBUG] kwargs:", kwargs, flush=True)
+            print("[DEBUG] GET params:", request.GET.dict(), flush=True)
+            print("[DEBUG] Authorization header:", request.META.get('HTTP_AUTHORIZATION'), flush=True)
+            print("[DEBUG] body:", request.data, flush=True)
+        except Exception as e:
+            print("[DEBUG] Error logging PUT /maestros/:", e, flush=True)
+        # Aceptar id desde URL kwargs, query param o body
+        id_maestro = kwargs.get('id') or request.GET.get('id') or request.data.get('id')
+        if not id_maestro:
+            return Response({"detail": "Se requiere el campo 'id' en el body o en la URL (maestros/{id})"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            maestro = Maestros.objects.get(id=id_maestro)
+        except Maestros.DoesNotExist:
+            return Response({"detail": "Maestro no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        maestro.id_trabajador = request.data.get('id_trabajador', maestro.id_trabajador)
+        maestro.fecha_nacimiento = request.data.get('fecha_nacimiento', maestro.fecha_nacimiento)
+        maestro.telefono = request.data.get('telefono', maestro.telefono)
+        maestro.rfc = request.data.get('rfc', maestro.rfc).upper() if request.data.get('rfc') else maestro.rfc
+        maestro.cubiculo = request.data.get('cubiculo', maestro.cubiculo)
+        maestro.area_investigacion = request.data.get('area_investigacion', maestro.area_investigacion)
+        materias = request.data.get('materias_json', None)
+        try:
+            if materias is None:
+                pass
+            elif isinstance(materias, (list, dict)):
+                maestro.materias_json = json.dumps(materias)
+            else:
+                maestro.materias_json = json.dumps(json.loads(materias))
+        except Exception:
+            maestro.materias_json = maestro.materias_json
+        maestro.save()
+
+        # Actualizar datos del user asociado
+        user = maestro.user
+        user.first_name = request.data.get('first_name', user.first_name)
+        user.last_name = request.data.get('last_name', user.last_name)
+        user.email = request.data.get('email', user.email)
+        user.save()
+
+        return Response({"message": "Maestro actualizado correctamente", "maestro": MaestroSerializer(maestro).data}, 200)
     
     # Eliminar maestro con delete (Borrar realmente)
     @transaction.atomic
     def delete(self, request, *args, **kwargs):
-        maestro = get_object_or_404(Maestros, id=request.GET.get("id"))
+        id_maestro = kwargs.get('id') or request.GET.get('id')
+        maestro = get_object_or_404(Maestros, id=id_maestro)
         try:
             maestro.user.delete()
             return Response({"details":"Maestro eliminado"},200)
