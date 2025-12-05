@@ -12,6 +12,8 @@ from app_movil_escolar_api.views import auth
 # from sistema_escolar_api.views import maestros
 
 urlpatterns = [
+    #API Root - Información del backend
+        path('', bootstrap.APIRootView.as_view()),
     #Create Admin
         path('admin/', users.AdminView.as_view()),
     #Admin Data
