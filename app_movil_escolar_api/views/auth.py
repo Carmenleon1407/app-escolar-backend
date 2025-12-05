@@ -22,36 +22,46 @@ class CustomAuthToken(ObtainAuthToken):
             role_names = []
             # Verifico si el usuario tiene un perfil asociado
             for role in roles:
-                role_names.append(role.name)
+                role_names.append(role.name.lower())  # Convertir a minúsculas
 
-            #Si solo es un rol especifico asignamos el elemento 0
-            role_names = role_names[0]
+            # Si solo es un rol específico asignamos el elemento 0
+            if role_names:
+                role_names = role_names[0]
+            else:
+                return Response({"details": "Usuario sin rol asignado"}, 403)
             
-            #Esta función genera la clave dinámica (token) para iniciar sesión
+            # Esta función genera la clave dinámica (token) para iniciar sesión
             token, created = Token.objects.get_or_create(user=user)
             
-            #Verificar que tipo de usuario quiere iniciar sesión
+            # Verificar que tipo de usuario quiere iniciar sesión
             
             if role_names == 'alumno':
                 alumno = Alumnos.objects.filter(user=user).first()
-                alumno = AlumnoSerializer(alumno).data
-                alumno["token"] = token.key
-                alumno["rol"] = "alumno"
-                return Response(alumno,200)
-            if role_names == 'maestro':
+                if alumno:
+                    alumno = AlumnoSerializer(alumno).data
+                    alumno["token"] = token.key
+                    alumno["rol"] = "alumno"
+                    return Response(alumno, 200)
+                else:
+                    return Response({"details": "Perfil de alumno no encontrado"}, 404)
+                    
+            elif role_names == 'maestro':
                 maestro = Maestros.objects.filter(user=user).first()
-                maestro = MaestroSerializer(maestro).data
-                maestro["token"] = token.key
-                maestro["rol"] = "maestro"
-                return Response(maestro,200)
-            if role_names == 'administrador':
-                user = UserSerializer(user, many=False).data
-                user['token'] = token.key
-                user["rol"] = "administrador"
-                return Response(user,200)
+                if maestro:
+                    maestro = MaestroSerializer(maestro).data
+                    maestro["token"] = token.key
+                    maestro["rol"] = "maestro"
+                    return Response(maestro, 200)
+                else:
+                    return Response({"details": "Perfil de maestro no encontrado"}, 404)
+                    
+            elif role_names == 'admin':
+                user_data = UserSerializer(user, many=False).data
+                user_data['token'] = token.key
+                user_data["rol"] = "admin"
+                return Response(user_data, 200)
             else:
-                return Response({"details":"Forbidden"},403)
-                pass
+                return Response({"details": f"Rol no reconocido: {role_names}"}, 403)
             
         return Response({}, status=status.HTTP_403_FORBIDDEN)
 
